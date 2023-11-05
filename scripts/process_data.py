@@ -5,6 +5,12 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import PowerTransformer
 import os
 
+import mlflow
+from mlflow.tracking import MlflowClient
+
+
+mlflow.set_tracking_uri("http://localhost:5000")
+mlflow.set_experiment("process_data")
 
 def work_fith_data(df, key):
 
@@ -24,9 +30,11 @@ def work_fith_data(df, key):
     cat_df.columns = category_columns
 
   return num_df.join(cat_df)
-  
+
 train_df = pd.read_csv('/home/clearml/projects/xFlow/mlops_practice_3/datasets/data.csv', sep=',')
-
-train_df = work_fith_data(train_df, 1) # датафрейм для обучения
-
+with mlflow.start_run():
+    train_df = work_fith_data(train_df, 1) # датафрейм для обучения
+    mlflow.log_artifact(local_path="/home/clearml/projects/xFlow/mlops_practice_3/scripts/process_data.py",
+                        artifact_path="process_data code")
+    mlflow.end_run()   	
 train_df.to_csv('/home/clearml/projects/xFlow/mlops_practice_3/datasets/data_processed.csv', sep=',', index = False)
